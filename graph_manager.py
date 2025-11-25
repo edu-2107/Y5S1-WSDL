@@ -14,6 +14,9 @@ class OntoMaintGraph:
         ont_dir = base_dir / "ontologies"
         data_dir = base_dir / "data"
 
+        print(f"Ontology dir: {ont_dir} exists={ont_dir.exists()}")
+        print(f"Data dir:     {data_dir} exists={data_dir.exists()}")
+
         for ttl in ont_dir.glob("*.ttl"):
             print(f"Loading ontology: {ttl}")
             self.graph.parse(ttl, format="turtle")
@@ -33,7 +36,10 @@ class OntoMaintGraph:
         print(f"After reasoning: {len(self.graph)} triples.")
 
     def run_query(self, query_str: str):
-        """
-        Run a SPARQL query over the graph.
-        """
         return list(self.graph.query(query_str))
+
+    def run_query_from_file(self, query_file: Path, filter_clause: str = ""):
+        text = query_file.read_text(encoding="utf-8")
+        text = text.replace("__FILTER__", filter_clause)
+        print("Running query from:", query_file)
+        return self.run_query(text)

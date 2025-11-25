@@ -1,9 +1,9 @@
 import click
 from pathlib import Path
-from .graph_manager import OntoMaintGraph
+from graph_manager import OntoMaintGraph
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 
 
 @click.group()
@@ -32,37 +32,23 @@ def impact(failure):
     g.apply_reasoning()
 
     failure_uri = f"http://example.org/ontomaint#{failure}"
+    query_file = BASE_DIR / "queries" / "impact_failure.sparql"
 
-    query = f"""
-    PREFIX onto: <http://example.org/ontomaint#>
+    filter_clause = f"FILTER (?failure = <{failure_uri}>)"
 
-    SELECT ?machine ?job ?nextJob ?propFailure
-    WHERE {{
-      <{failure_uri}> a onto:ErrorContext ;
-                       onto:affectsMachine ?machine ;
-                       onto:blocksJob ?job .
+    results = g.run_query_from_file(query_file, filter_clause=filter_clause)
 
-      OPTIONAL {{ ?job onto:nextJob ?nextJob . }}
-
-      OPTIONAL {{
-        ?fp a onto:FailurePropagation ;
-            onto:hasCause <{failure_uri}> ;
-            onto:propagatesTo ?propFailure .
-      }}
-    }}
-    """
-
-    results = g.run_query(query)
     if not results:
-        click.echo("No impact found for that failure.")
+        click.echo(f"No impact found for failure {failure}.")
         return
 
-    for row in results:
-        machine, job, next_job, prop_failure = row
-        click.echo(f"- Machine: {machine}")
-        click.echo(f"  Blocks job: {job}")
+    click.echo(f"Impact for failure {failure}:\n")
+
+    for failure_res, machine, job, next_job, prop_failure in results:
+        click.echo(f"- Affected machine: {machine}")
+        click.echo(f"  Blocked job:   {job}")
         if next_job:
-            click.echo(f"  Downstream job: {next_job}")
+            click.echo(f"  Next job:     {next_job}")
         if prop_failure:
             click.echo(f"  May propagate to: {prop_failure}")
         click.echo("")

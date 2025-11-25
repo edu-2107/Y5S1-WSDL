@@ -1,6 +1,6 @@
 PREFIX onto: <http://example.org/ontomaint#>
 
-SELECT ?machine ?job ?nextJob ?propFailure
+SELECT ?failure ?machine ?job ?nextJob ?propFailure
 WHERE {
   ?failure a onto:ErrorContext ;
            onto:affectsMachine ?machine ;
@@ -15,4 +15,6 @@ WHERE {
         onto:hasCause ?failure ;
         onto:propagatesTo ?propFailure .
   }
+
+  # __FILTER__
 }
