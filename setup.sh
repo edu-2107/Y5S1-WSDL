@@ -13,19 +13,19 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✔ Docker image built successfully."
-
+echo "======================================"
 echo ""
 echo "→ Running ontology initialization..."
 docker run --rm ontomaint init
-
+echo "======================================"
 echo ""
 echo "→ Listing failures..."
 docker run --rm ontomaint failures
-
+echo "======================================"
 echo ""
 echo "→ Testing failure impact (example: OverheatingA)..."
 docker run --rm ontomaint impact --failure OverheatingA
-
+echo "======================================"
 echo ""
 echo "→ Testing corrective actions (example: OverheatingA)..."
 docker run --rm ontomaint actions --failure OverheatingA
