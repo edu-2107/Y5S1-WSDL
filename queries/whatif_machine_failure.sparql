@@ -1,0 +1,12 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+SELECT ?failure ?blockedJob ?nextJob
+WHERE {
+  ?failure a onto:ErrorContext ;
+           onto:affectsMachine ?machine ;
+           onto:blocksJob ?blockedJob .
+
+  OPTIONAL { ?blockedJob onto:nextJob ?nextJob . }
+
+  __FILTER__
+}

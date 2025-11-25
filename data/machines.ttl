@@ -68,3 +68,15 @@ onto:PropagationAtoB a onto:FailurePropagation ;
 onto:PropagationBtoD a onto:FailurePropagation ;
   onto:hasCause     onto:OverloadB ;
   onto:propagatesTo onto:LabelMisalignmentD .
+
+onto:OverheatingA
+  onto:hasSeverity 4 ;
+  onto:hasDowntimeMinutes 30 .
+
+onto:OverloadB
+  onto:hasSeverity 5 ;
+  onto:hasDowntimeMinutes 45 .
+
+onto:LabelMisalignmentD
+  onto:hasSeverity 2 ;
+  onto:hasDowntimeMinutes 10 .

@@ -113,6 +113,59 @@ def failures():
         else:
             click.echo(f"- {failure}")
 
+@app.command("critical")
+def critical():
+    """List failures sorted by severity and downtime."""
+    g = OntoMaintGraph()
+    g.load_ontologies_and_data(BASE_DIR)
+    g.apply_reasoning()
+
+    query_file = BASE_DIR / "queries" / "critical_failures.sparql"
+
+    results = g.run_query_from_file(query_file)
+
+    if not results:
+        click.echo("No critical failures found.")
+        return
+
+    click.echo("Critical failures (sorted):\n")
+
+    for failure, machine, severity, downtime in results:
+        click.echo(f"- {failure}")
+        click.echo(f"  Machine:  {machine}")
+        click.echo(f"  Severity: {severity}")
+        click.echo(f"  Downtime: {downtime} minutes\n")
+
+@app.command("whatif")
+@click.option("--machine", required=True,
+              help="Machine name (e.g. MixerA)")
+def whatif(machine):
+    """Simulate all failures that affect a given machine."""
+    g = OntoMaintGraph()
+    g.load_ontologies_and_data(BASE_DIR)
+    g.apply_reasoning()
+
+    machine_uri = f"http://example.org/ontomaint#{machine}"
+    query_file = BASE_DIR / "queries" / "whatif_machine_failure.sparql"
+
+    filter_clause = f"FILTER (?machine = <{machine_uri}>)"
+
+    results = g.run_query_from_file(query_file, filter_clause=filter_clause)
+
+    if not results:
+        click.echo(f"No failures affect machine {machine}.")
+        return
+
+    click.echo(f"What-if scenario: failures affecting {machine}\n")
+
+    for failure, blockedJob, nextJob in results:
+        click.echo(f"- Failure: {failure}")
+        click.echo(f"  Blocks job: {blockedJob}")
+        if nextJob:
+            click.echo(f"  Downstream job: {nextJob}")
+        click.echo("")
+
+
 
 if __name__ == "__main__":
     app()

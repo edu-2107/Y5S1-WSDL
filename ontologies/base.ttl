@@ -39,3 +39,11 @@ onto:hasCause          a owl:ObjectProperty ;
 onto:monitoredBy       a owl:ObjectProperty ;
   rdfs:domain onto:Machine ;
   rdfs:range  sosa:Sensor .
+
+onto:hasSeverity a owl:DatatypeProperty ;
+  rdfs:domain onto:ErrorContext ;
+  rdfs:range xsd:integer .
+
+onto:hasDowntimeMinutes a owl:DatatypeProperty ;
+  rdfs:domain onto:ErrorContext ;
+  rdfs:range xsd:integer .
