@@ -7,12 +7,12 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 @click.group()
-def cli():
-    """OntoMaint CLI - run maintenance queries and get recommendations."""
+def app():
+    """OntoMaint app - run maintenance queries and get recommendations."""
     pass
 
 
-@cli.command("init")
+@app.command("init")
 def init_graph():
     """Load ontologies + data and run reasoning (dry run)."""
     g = OntoMaintGraph()
@@ -20,7 +20,7 @@ def init_graph():
     g.apply_reasoning()
 
 
-@cli.command("impact")
+@app.command("impact")
 @click.option("--failure", required=True,
               help="URI local name of the ErrorContext (e.g. OverheatingA)")
 def impact(failure):
@@ -54,7 +54,7 @@ def impact(failure):
         click.echo("")
         
 
-@cli.command("actions")
+@app.command("actions")
 @click.option("--failure", required=True,
               help="URI local name of the ErrorContext (e.g. OverheatingA)")
 def actions(failure):
@@ -87,4 +87,4 @@ def actions(failure):
 
 
 if __name__ == "__main__":
-    cli()
+    app()
