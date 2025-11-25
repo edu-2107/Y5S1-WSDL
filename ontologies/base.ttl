@@ -1,0 +1,41 @@
+@prefix onto: <http://example.org/ontomaint#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix saref: <https://w3id.org/saref#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+onto:Machine           a owl:Class .
+onto:Job               a owl:Class .
+onto:ErrorContext      a owl:Class .
+onto:FailurePropagation a owl:Class .
+onto:CorrectiveAction  a owl:Class .
+
+onto:affectsMachine    a owl:ObjectProperty ;
+  rdfs:domain onto:ErrorContext ;
+  rdfs:range  onto:Machine .
+
+onto:blocksJob         a owl:ObjectProperty ;
+  rdfs:domain onto:ErrorContext ;
+  rdfs:range  onto:Job .
+
+onto:requiresAction    a owl:ObjectProperty ;
+  rdfs:domain onto:ErrorContext ;
+  rdfs:range  onto:CorrectiveAction .
+
+onto:nextJob           a owl:ObjectProperty ;
+  rdfs:domain onto:Job ;
+  rdfs:range  onto:Job .
+
+onto:propagatesTo      a owl:ObjectProperty ;
+  rdfs:domain onto:FailurePropagation ;
+  rdfs:range  onto:ErrorContext .
+
+onto:hasCause          a owl:ObjectProperty ;
+  rdfs:domain onto:FailurePropagation ;
+  rdfs:range  onto:ErrorContext .
+
+onto:monitoredBy       a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range  sosa:Sensor .

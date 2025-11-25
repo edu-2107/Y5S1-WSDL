@@ -1,0 +1,30 @@
+@prefix onto: <http://example.org/ontomaint#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+onto:MachineA a onto:Machine .
+onto:MachineB a onto:Machine .
+onto:MachineC a onto:Machine .
+
+onto:JobCutting   a onto:Job .
+onto:JobAssembly  a onto:Job .
+onto:JobPackaging a onto:Job .
+
+onto:JobCutting   onto:nextJob onto:JobAssembly .
+onto:JobAssembly  onto:nextJob onto:JobPackaging .
+
+onto:OverheatingA a onto:ErrorContext ;
+  onto:affectsMachine onto:MachineA ;
+  onto:blocksJob      onto:JobCutting ;
+  onto:requiresAction onto:CoolantCheck .
+
+onto:CoolantCheck a onto:CorrectiveAction .
+
+onto:PropagationAtoB a onto:FailurePropagation ;
+  onto:hasCause     onto:OverheatingA ;
+  onto:propagatesTo onto:OverloadB .
+
+onto:OverloadB a onto:ErrorContext ;
+  onto:affectsMachine onto:MachineB ;
+  onto:blocksJob      onto:JobAssembly ;
+  onto:requiresAction onto:LoadBalancing .

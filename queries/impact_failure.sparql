@@ -1,0 +1,18 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+SELECT ?machine ?job ?nextJob ?propFailure
+WHERE {
+  ?failure a onto:ErrorContext ;
+           onto:affectsMachine ?machine ;
+           onto:blocksJob ?job .
+
+  OPTIONAL {
+    ?job onto:nextJob ?nextJob .
+  }
+
+  OPTIONAL {
+    ?fp a onto:FailurePropagation ;
+        onto:hasCause ?failure ;
+        onto:propagatesTo ?propFailure .
+  }
+}
