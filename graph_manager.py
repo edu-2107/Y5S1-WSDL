@@ -14,15 +14,15 @@ class OntoMaintGraph:
         ont_dir = base_dir / "ontologies"
         data_dir = base_dir / "data"
 
-        print(f"Ontology dir: {ont_dir} exists={ont_dir.exists()}")
-        print(f"Data dir:     {data_dir} exists={data_dir.exists()}")
+        #print(f"Ontology dir: {ont_dir} exists={ont_dir.exists()}")
+        #print(f"Data dir:     {data_dir} exists={data_dir.exists()}")
 
         for ttl in ont_dir.glob("*.ttl"):
-            print(f"Loading ontology: {ttl}")
+            #print(f"Loading ontology: {ttl}")
             self.graph.parse(ttl, format="turtle")
 
         for ttl in data_dir.glob("*.ttl"):
-            print(f"Loading data: {ttl}")
+            #print(f"Loading data: {ttl}")
             self.graph.parse(ttl, format="turtle")
 
         print(f"Graph loaded with {len(self.graph)} triples.")

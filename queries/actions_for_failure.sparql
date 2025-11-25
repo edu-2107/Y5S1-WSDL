@@ -1,0 +1,9 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+SELECT ?failure ?action
+WHERE {
+  ?failure a onto:ErrorContext ;
+           onto:requiresAction ?action .
+
+  # __FILTER__
+}
