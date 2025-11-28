@@ -1,12 +1,14 @@
 @prefix onto: <http://example.org/ontomaint#> .
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
-@prefix saref: <https://w3id.org/saref#> .
+@prefix s4inma: <https://saref.etsi.org/saref4inma/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
-onto:Machine           a owl:Class .
+onto:Machine           a owl:Class ;
+  rdfs:subClassOf s4inma:ProductionEquipment .
+
 onto:Job               a owl:Class .
 onto:ErrorContext      a owl:Class .
 onto:FailurePropagation a owl:Class .
