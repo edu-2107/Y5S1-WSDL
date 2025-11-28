@@ -14,38 +14,47 @@ onto:ErrorContext      a owl:Class .
 onto:FailurePropagation a owl:Class .
 onto:CorrectiveAction  a owl:Class .
 
+# associates error to the machine
 onto:affectsMachine    a owl:ObjectProperty ;
   rdfs:domain onto:ErrorContext ;
   rdfs:range  onto:Machine .
 
+# associates error to the task that stopped
 onto:blocksJob         a owl:ObjectProperty ;
   rdfs:domain onto:ErrorContext ;
   rdfs:range  onto:Job .
 
+# associates error to its solution
 onto:requiresAction    a owl:ObjectProperty ;
   rdfs:domain onto:ErrorContext ;
   rdfs:range  onto:CorrectiveAction .
 
+# which jobs fail next due to the 1st one
 onto:nextJob           a owl:ObjectProperty ;
   rdfs:domain onto:Job ;
   rdfs:range  onto:Job .
 
+# points to next error
 onto:propagatesTo      a owl:ObjectProperty ;
   rdfs:domain onto:FailurePropagation ;
   rdfs:range  onto:ErrorContext .
 
+# points to original error
 onto:hasCause          a owl:ObjectProperty ;
   rdfs:domain onto:FailurePropagation ;
   rdfs:range  onto:ErrorContext .
 
+# associates machine to its sensor
 onto:monitoredBy       a owl:ObjectProperty ;
   rdfs:domain onto:Machine ;
   rdfs:range  sosa:Sensor .
 
+# integer number to represent severity
 onto:hasSeverity a owl:DatatypeProperty ;
   rdfs:domain onto:ErrorContext ;
   rdfs:range xsd:integer .
 
+# cost of error in time
 onto:hasDowntimeMinutes a owl:DatatypeProperty ;
   rdfs:domain onto:ErrorContext ;
   rdfs:range xsd:integer .
