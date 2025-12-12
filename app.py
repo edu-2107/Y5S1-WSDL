@@ -6,6 +6,18 @@ from graph_manager import OntoMaintGraph
 BASE_DIR = Path(__file__).resolve().parent
 
 
+def format_uri(uri):
+    """Extract local name from URI (e.g., 'http://example.org/ontomaint#Machine' -> 'Machine')"""
+    if uri is None:
+        return "None"
+    uri_str = str(uri)
+    if '#' in uri_str:
+        return uri_str.split('#')[-1]
+    elif '/' in uri_str:
+        return uri_str.split('/')[-1]
+    return uri_str
+
+
 @click.group()
 def app():
     """OntoMaint app - run maintenance queries and get recommendations."""
@@ -45,12 +57,12 @@ def impact(failure):
     click.echo(f"Impact for failure {failure}:\n")
 
     for failure_res, machine, job, next_job, prop_failure in results:
-        click.echo(f"- Affected machine: {machine}")
+        click.echo(f"- Affected machine: {format_uri(machine)}")
         click.echo(f"  Blocked job:   {job}")
         if next_job:
             click.echo(f"  Next job:     {next_job}")
         if prop_failure:
-            click.echo(f"  May propagate to: {prop_failure}")
+            click.echo(f"  May propagate to: {format_uri(prop_failure)}")
         click.echo("")
 
 
@@ -109,9 +121,10 @@ def failures():
     click.echo("Known failures:\n")
     for failure, machine in results:
         if machine:
-            click.echo(f"- {failure} (machine: {machine})")
+            click.echo(f"- {failure} (machine: {format_uri(machine)})")
         else:
             click.echo(f"- {failure}")
+            
 
 @app.command("critical")
 def critical():
@@ -131,10 +144,11 @@ def critical():
     click.echo("Critical failures (sorted):\n")
 
     for failure, machine, severity, downtime in results:
-        click.echo(f"- {failure}")
-        click.echo(f"  Machine:  {machine}")
+        click.echo(f"  Failure:  {format_uri(failure)}")
+        click.echo(f"  Machine:  {format_uri(machine)}")
         click.echo(f"  Severity: {severity}")
         click.echo(f"  Downtime: {downtime} minutes\n")
+            
 
 @app.command("whatif")
 @click.option("--machine", required=True,
@@ -159,10 +173,10 @@ def whatif(machine):
     click.echo(f"What-if scenario: failures affecting {machine}\n")
 
     for failure, blockedJob, nextJob in results:
-        click.echo(f"- Failure: {failure}")
-        click.echo(f"  Blocks job: {blockedJob}")
+        click.echo(f"- Failure: {format_uri(failure)}")
+        click.echo(f"  Blocks job: {format_uri(blockedJob)}")
         if nextJob:
-            click.echo(f"  Downstream job: {nextJob}")
+            click.echo(f"  Downstream job: {format_uri(nextJob)}")
         click.echo("")
 
 
@@ -181,11 +195,11 @@ def health():
         return
 
     click.echo("Machine Health Status:\n")
-    click.echo(f"{'Machine':<20} {'Uptime %':<12} {'Failure Rate':<15} {'Age (yrs)':<12} {'Last Maintenance':<20} {'Interval (days)':<15}")
+    click.echo(f"{'Machine':<15} {'Uptime %':<12} {'Failure Rate':<15} {'Age (yrs)':<12} {'Last Maintenance':<20} {'Interval (days)':<15}")
     click.echo("-" * 95)
 
     for machine, uptime, failure_rate, age, last_maint, interval in results:
-        click.echo(f"{str(machine):<20} {str(uptime):<12} {str(failure_rate):<15} {str(age):<12} {str(last_maint):<20} {str(interval):<15}")
+        click.echo(f"{format_uri(machine):<15} {str(uptime):<12} {str(failure_rate):<15} {str(age):<12} {str(last_maint):<20} {str(interval):<15}")
 
 
 @app.command("high-risk")
@@ -203,11 +217,11 @@ def high_risk():
         return
 
     click.echo("High-Risk Failures:\n")
-    click.echo(f"{'Failure':<20} {'Machine':<15} {'Severity':<12} {'Downtime (min)':<15} {'Cascades':<12} {'Next Failures':<25} {'Action':<20}")
+    click.echo(f"{'Failure':<20} {'Machine':<15} {'Severity':<10} {'Downtime (min)':<15} {'Cascades':<7} {'Next Failures':<20} {'Action':<20}")
     click.echo("-" * 120)
 
     for failure, machine, severity, downtime, cascade_count, next_failures, required_action in results:
-        click.echo(f"{str(failure):<20} {str(machine):<15} {str(severity):<12} {str(downtime):<15} {str(cascade_count):<12} {str(next_failures):<25} {str(required_action):<20}")
+        click.echo(f"{format_uri(failure):<20} {format_uri(machine):<15} {str(severity):<10} {str(downtime):<15} {str(cascade_count):<7} {format_uri(next_failures):<20} {str(format_uri(required_action)):<20}")
 
 
 @app.command("maintenance")
@@ -225,11 +239,11 @@ def maintenance():
         return
 
     click.echo("Maintenance Schedules:\n")
-    click.echo(f"{'Machine':<20} {'Task':<25} {'Description':<30} {'Due Date':<20} {'Est. Hours':<12} {'Team':<15} {'Specialty':<20}")
+    click.echo(f"{'Machine':<15} {'Task':<25} {'Description':<30} {'Due Date':<20} {'Est. Hours':<10} {'Team':<15} {'Specialty':<20}")
     click.echo("-" * 145)
 
     for machine, task, description, due_date, est_hours, team, specialty in results:
-        click.echo(f"{str(machine):<20} {str(task):<25} {str(description):<30} {str(due_date):<20} {str(est_hours):<12} {str(team):<15} {str(specialty):<20}")
+        click.echo(f"{format_uri(machine):<15} {format_uri(task):<25} {str(description):<30} {str(due_date):<20} {str(est_hours):<10} {format_uri(team):<15} {str(specialty):<20}")
 
 
 @app.command("production")
@@ -251,7 +265,7 @@ def production():
     click.echo("-" * 110)
 
     for batch, batch_size, batch_date, affected_machines, total_downtime, total_severity, cascading in results:
-        click.echo(f"{str(batch):<20} {str(batch_size):<12} {str(batch_date):<20} {str(affected_machines):<18} {str(total_downtime):<16} {str(total_severity):<12} {str(cascading):<12}")
+        click.echo(f"{format_uri(batch):<20} {str(batch_size):<12} {str(batch_date):<20} {format_uri(affected_machines):<18} {str(total_downtime):<16} {str(total_severity):<12} {str(cascading):<12}")
 
 
 @app.command("sensors")
@@ -273,7 +287,7 @@ def sensors():
     click.echo("-" * 115)
 
     for machine, sensor, metric_name, metric_value, metric_unit, measurement_time in results:
-        click.echo(f"{str(machine):<20} {str(sensor):<20} {str(metric_name):<20} {str(metric_value):<15} {str(metric_unit):<12} {str(measurement_time):<25}")
+        click.echo(f"{format_uri(machine):<20} {format_uri(sensor):<20} {str(metric_name):<20} {str(metric_value):<15} {str(metric_unit):<12} {str(measurement_time):<25}")
 
 
 @app.command("spare-parts")
@@ -295,7 +309,7 @@ def spare_parts():
     click.echo("-" * 105)
 
     for failure, action, part, part_number, lead_time, cost in results:
-        click.echo(f"{str(failure):<20} {str(action):<25} {str(part):<20} {str(part_number):<15} {str(lead_time):<12} {str(cost):<12}")
+        click.echo(f"{format_uri(failure):<20} {format_uri(action):<25} {format_uri(part):<20} {str(part_number):<15} {str(lead_time):<12} {str(cost):<12}")
 
 
 @app.command("team-workload")
@@ -317,7 +331,7 @@ def team_workload():
     click.echo("-" * 75)
 
     for team, operator_count, machines_responsible, total_hours in results:
-        click.echo(f"{str(team):<20} {str(operator_count):<12} {str(machines_responsible):<20} {str(total_hours):<22}")
+        click.echo(f"{format_uri(team):<20} {str(operator_count):<12} {str(machines_responsible):<20} {str(total_hours):<22}")
 
 
 @app.command("all")

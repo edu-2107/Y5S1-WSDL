@@ -14,6 +14,9 @@ WHERE {
 
   ?team a onto:Team .
 
+  # Bind the assigned team for output
+  BIND(?team AS ?assignedTeam)
+
   # Optional: find the best operator for the task
   OPTIONAL {
     ?machine onto:hasComponent ?comp .
