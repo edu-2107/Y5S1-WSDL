@@ -7,7 +7,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-After setup, you can run queries manually through the CLI.<br>
+After setup, you can run queries through the GUI, or manually through the CLI.<br>
 This is a list of all the queries you can run:
 
 ```
