@@ -144,8 +144,8 @@ def critical():
     click.echo("Critical failures (sorted):\n")
 
     for failure, machine, severity, downtime in results:
-        click.echo(f"- {failure}")
-        click.echo(f"  Machine:  {machine}")
+        click.echo(f"  Failure:  {format_uri(failure)}")
+        click.echo(f"  Machine:  {format_uri(machine)}")
         click.echo(f"  Severity: {severity}")
         click.echo(f"  Downtime: {downtime} minutes\n")
             
