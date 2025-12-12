@@ -17,6 +17,8 @@ docker run --rm ontomaint actions --failure <failure>           # see actions to
 
 docker run --rm ontomaint health                                # see current status of machines and overall "health"
 
+docker run --rm ontomaint critical                              # see list of critical failures, ranked from most to least severe
+
 docker run --rm ontomaint high-risk                             # see list of high-risk failures, and cascading failures,
                                                                 # ranked from most to least severe
 

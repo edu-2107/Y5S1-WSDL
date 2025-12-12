@@ -126,6 +126,30 @@ def failures():
             click.echo(f"- {failure}")
             
 
+@app.command("critical")
+def critical():
+    """List failures sorted by severity and downtime."""
+    g = OntoMaintGraph()
+    g.load_ontologies_and_data(BASE_DIR)
+    g.apply_reasoning()
+
+    query_file = BASE_DIR / "queries" / "critical_failures.sparql"
+
+    results = g.run_query_from_file(query_file)
+
+    if not results:
+        click.echo("No critical failures found.")
+        return
+
+    click.echo("Critical failures (sorted):\n")
+
+    for failure, machine, severity, downtime in results:
+        click.echo(f"- {failure}")
+        click.echo(f"  Machine:  {machine}")
+        click.echo(f"  Severity: {severity}")
+        click.echo(f"  Downtime: {downtime} minutes\n")
+            
+
 @app.command("whatif")
 @click.option("--machine", required=True,
               help="Machine name (e.g. MixerA)")
