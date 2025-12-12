@@ -31,16 +31,41 @@ QUERY_PARAMS = {
         "params": [
             {"var": "?machine", "label": "Machine", "type": "Machine", "allow_all": True},
         ],
+        
     },
-    "critical_failures.sparql": {"title": "Critical Failures", "params": []},
-    "high_risk_failures.sparql": {"title": "High-Risk Failures", "params": []},
-    "machine_health.sparql": {"title": "Machine Health", "params": []},
+    "critical_failures.sparql": {
+        "title": "Critical Failures",
+        "params": []
+    },
+    "high_risk_failures.sparql":{
+        "title": "High-Risk Failures", "params": []
+    },
+    "machine_health.sparql": {
+        "title": "Machine Health", "params": []
+    },
     "maintenance_schedule.sparql": {
         "title": "Maintenance Schedule",
         "params": [
             {"var": "?machine", "label": "Machine", "type": "Machine", "allow_all": True},
         ],
     },
+
+    "spare_parts_impact.sparql": {
+        "title": "Spare Parts & Costs",
+        "params": [] 
+    },
+    "team_workload.sparql": {
+        "title": "Maintenance Team Workload",
+        "params": []
+    },
+    "sensor_performance.sparql": {
+        "title": "Sensor IoT Data",
+        "params": []
+    },
+    "production_impact_analysis.sparql": {
+        "title": "Production Impact",
+        "params": []
+    }
 }
 
 
