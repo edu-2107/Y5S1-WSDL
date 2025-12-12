@@ -35,6 +35,12 @@ QUERY_PARAMS = {
     "critical_failures.sparql": {"title": "Critical Failures", "params": []},
     "high_risk_failures.sparql": {"title": "High-Risk Failures", "params": []},
     "machine_health.sparql": {"title": "Machine Health", "params": []},
+    "maintenance_schedule.sparql": {
+        "title": "Maintenance Schedule",
+        "params": [
+            {"var": "?machine", "label": "Machine", "type": "Machine", "allow_all": True},
+        ],
+    },
 }
 
 
@@ -172,7 +178,7 @@ params = meta["params"]
 
 
 # ============================================================
-# Sidebar – Parameters (HARD-CODED BATCH EXCLUSION HERE)
+# Sidebar – Parameters (with hard-coded batch exclusion)
 # ============================================================
 st.sidebar.divider()
 st.sidebar.subheader("Parameters")
@@ -196,7 +202,6 @@ else:
 
         if p_type == "Machine":
             options = get_instances_of("Machine")
-            # 🔴 HARD-CODED EXCLUSION
             options = [m for m in options if m not in EXCLUDED_BATCHES]
 
         elif p_type == "ErrorContext":
