@@ -13,6 +13,13 @@ onto:Job               a owl:Class .
 onto:ErrorContext      a owl:Class .
 onto:FailurePropagation a owl:Class .
 onto:CorrectiveAction  a owl:Class .
+onto:MaintenanceTask   a owl:Class .
+onto:Component         a owl:Class .
+onto:Operator          a owl:Class .
+onto:Team              a owl:Class .
+onto:SparePart         a owl:Class .
+onto:ProductionBatch   a owl:Class .
+onto:PerformanceMetric a owl:Class .
 
 # associates error to the machine
 onto:affectsMachine    a owl:ObjectProperty ;
@@ -58,3 +65,129 @@ onto:hasSeverity a owl:DatatypeProperty ;
 onto:hasDowntimeMinutes a owl:DatatypeProperty ;
   rdfs:domain onto:ErrorContext ;
   rdfs:range xsd:integer .
+
+# Machine and component properties
+onto:hasComponent a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range onto:Component .
+
+onto:hasCapacity a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:float .
+
+onto:hasAgeYears a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:float .
+
+onto:manufacturingYear a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:gYear .
+
+onto:lastMaintenanceDate a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:dateTime .
+
+onto:maintenanceIntervalDays a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:integer .
+
+# Operator and team properties
+onto:operatedBy a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range onto:Operator .
+
+onto:maintainedBy a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range onto:Team .
+
+onto:belongsToTeam a owl:ObjectProperty ;
+  rdfs:domain onto:Operator ;
+  rdfs:range onto:Team .
+
+onto:hasExperienceLevel a owl:DatatypeProperty ;
+  rdfs:domain onto:Operator ;
+  rdfs:range xsd:integer .
+
+onto:hasSpecialty a owl:DatatypeProperty ;
+  rdfs:domain onto:Operator ;
+  rdfs:range xsd:string .
+
+# Maintenance task properties
+onto:requiresMaintenance a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range onto:MaintenanceTask .
+
+onto:isScheduledFor a owl:ObjectProperty ;
+  rdfs:domain onto:MaintenanceTask ;
+  rdfs:range xsd:dateTime .
+
+onto:dueDate a owl:DatatypeProperty ;
+  rdfs:domain onto:MaintenanceTask ;
+  rdfs:range xsd:dateTime .
+
+onto:maintenanceDescription a owl:DatatypeProperty ;
+  rdfs:domain onto:MaintenanceTask ;
+  rdfs:range xsd:string .
+
+onto:estimatedDurationHours a owl:DatatypeProperty ;
+  rdfs:domain onto:MaintenanceTask ;
+  rdfs:range xsd:float .
+
+# Spare parts
+onto:requiresSparePart a owl:ObjectProperty ;
+  rdfs:domain onto:CorrectiveAction ;
+  rdfs:range onto:SparePart .
+
+onto:partNumber a owl:DatatypeProperty ;
+  rdfs:domain onto:SparePart ;
+  rdfs:range xsd:string .
+
+onto:leadTimeDays a owl:DatatypeProperty ;
+  rdfs:domain onto:SparePart ;
+  rdfs:range xsd:integer .
+
+onto:costUSD a owl:DatatypeProperty ;
+  rdfs:domain onto:SparePart ;
+  rdfs:range xsd:float .
+
+# Production batch and metrics
+onto:processesBatch a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range onto:ProductionBatch .
+
+onto:batchSize a owl:DatatypeProperty ;
+  rdfs:domain onto:ProductionBatch ;
+  rdfs:range xsd:integer .
+
+onto:batchDate a owl:DatatypeProperty ;
+  rdfs:domain onto:ProductionBatch ;
+  rdfs:range xsd:dateTime .
+
+# Performance and monitoring
+onto:hasPerformanceMetric a owl:ObjectProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range onto:PerformanceMetric .
+
+onto:metricName a owl:DatatypeProperty ;
+  rdfs:domain onto:PerformanceMetric ;
+  rdfs:range xsd:string .
+
+onto:metricValue a owl:DatatypeProperty ;
+  rdfs:domain onto:PerformanceMetric ;
+  rdfs:range xsd:float .
+
+onto:metricUnit a owl:DatatypeProperty ;
+  rdfs:domain onto:PerformanceMetric ;
+  rdfs:range xsd:string .
+
+onto:measurementTime a owl:DatatypeProperty ;
+  rdfs:domain onto:PerformanceMetric ;
+  rdfs:range xsd:dateTime .
+
+onto:failureRate a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:float .
+
+onto:uptime a owl:DatatypeProperty ;
+  rdfs:domain onto:Machine ;
+  rdfs:range xsd:float .

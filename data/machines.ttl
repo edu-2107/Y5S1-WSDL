@@ -2,13 +2,112 @@
 @prefix sosa: <http://www.w3.org/ns/sosa/> .
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
 
+
 ### Machines in a bottling/packaging line
 
-onto:MixerA      a onto:Machine .
-onto:FillerB     a onto:Machine .
-onto:CapperC     a onto:Machine .
-onto:LabelerD    a onto:Machine .
-onto:PackerE     a onto:Machine .
+onto:MixerA      a onto:Machine ;
+  onto:hasCapacity 500.0 ;
+  onto:manufacturingYear "2018"^^xsd:gYear ;
+  onto:hasAgeYears 6.0 ;
+  onto:lastMaintenanceDate "2025-12-01T14:30:00"^^xsd:dateTime ;
+  onto:maintenanceIntervalDays 90 ;
+  onto:failureRate 0.02 ;
+  onto:uptime 98.5 ;
+  onto:operatedBy onto:OperatorAlice ;
+  onto:maintainedBy onto:MaintenanceTeamA ;
+  onto:monitoredBy onto:TempSensorMixer ;
+  onto:hasComponent onto:MixerBlade ;
+  onto:hasComponent onto:MixerMotor ;
+  onto:hasComponent onto:MixerSeal ;
+  onto:requiresMaintenance onto:MaintenanceTask_MixerA_1 ;
+  onto:hasPerformanceMetric onto:MetricMixerTemp ;
+  onto:hasPerformanceMetric onto:MetricMixerSpeed .
+
+onto:FillerB     a onto:Machine ;
+  onto:hasCapacity 300.0 ;
+  onto:manufacturingYear "2019"^^xsd:gYear ;
+  onto:hasAgeYears 5.5 ;
+  onto:lastMaintenanceDate "2025-11-15T10:00:00"^^xsd:dateTime ;
+  onto:maintenanceIntervalDays 60 ;
+  onto:failureRate 0.035 ;
+  onto:uptime 97.2 ;
+  onto:operatedBy onto:OperatorBob ;
+  onto:maintainedBy onto:MaintenanceTeamA ;
+  onto:monitoredBy onto:VibrationSensorFiller ;
+  onto:hasComponent onto:FillerNozzle ;
+  onto:hasComponent onto:FillerPump ;
+  onto:hasComponent onto:FillerValve ;
+  onto:requiresMaintenance onto:MaintenanceTask_FillerB_1 ;
+  onto:hasPerformanceMetric onto:MetricFillerPressure ;
+  onto:hasPerformanceMetric onto:MetricFillerFlow .
+
+onto:CapperC     a onto:Machine ;
+  onto:hasCapacity 400.0 ;
+  onto:manufacturingYear "2020"^^xsd:gYear ;
+  onto:hasAgeYears 4.8 ;
+  onto:lastMaintenanceDate "2025-10-20T09:15:00"^^xsd:dateTime ;
+  onto:maintenanceIntervalDays 45 ;
+  onto:failureRate 0.015 ;
+  onto:uptime 99.1 ;
+  onto:operatedBy onto:OperatorCharlie ;
+  onto:maintainedBy onto:MaintenanceTeamB ;
+  onto:hasComponent onto:CapperJaws ;
+  onto:hasComponent onto:CapperSpindle ;
+  onto:requiresMaintenance onto:MaintenanceTask_CapperC_1 ;
+  onto:hasPerformanceMetric onto:MetricCapperTorque .
+
+onto:LabelerD    a onto:Machine ;
+  onto:hasCapacity 350.0 ;
+  onto:manufacturingYear "2021"^^xsd:gYear ;
+  onto:hasAgeYears 3.8 ;
+  onto:lastMaintenanceDate "2025-12-05T16:45:00"^^xsd:dateTime ;
+  onto:maintenanceIntervalDays 120 ;
+  onto:failureRate 0.025 ;
+  onto:uptime 98.0 ;
+  onto:operatedBy onto:OperatorDiana ;
+  onto:maintainedBy onto:MaintenanceTeamB ;
+  onto:hasComponent onto:LabelRoll ;
+  onto:hasComponent onto:LabelPrinter ;
+  onto:hasComponent onto:LabelSensor ;
+  onto:requiresMaintenance onto:MaintenanceTask_LabelerD_1 ;
+  onto:hasPerformanceMetric onto:MetricLabelAccuracy ;
+  onto:hasPerformanceMetric onto:MetricLabelSpeed .
+
+onto:PackerE     a onto:Machine ;
+  onto:hasCapacity 250.0 ;
+  onto:manufacturingYear "2022"^^xsd:gYear ;
+  onto:hasAgeYears 2.8 ;
+  onto:lastMaintenanceDate "2025-11-28T13:20:00"^^xsd:dateTime ;
+  onto:maintenanceIntervalDays 90 ;
+  onto:failureRate 0.01 ;
+  onto:uptime 99.5 ;
+  onto:operatedBy onto:OperatorEve ;
+  onto:maintainedBy onto:MaintenanceTeamB ;
+  onto:hasComponent onto:PackerArm ;
+  onto:hasComponent onto:PackerGripper ;
+  onto:hasComponent onto:PackerConveyor ;
+  onto:requiresMaintenance onto:MaintenanceTask_PackerE_1 ;
+  onto:hasPerformanceMetric onto:MetricPackerSpeed ;
+  onto:hasPerformanceMetric onto:MetricPackerAccuracy .
+
+
+### Components
+
+onto:MixerBlade a onto:Component .
+onto:MixerMotor a onto:Component .
+onto:MixerSeal a onto:Component .
+onto:FillerNozzle a onto:Component .
+onto:FillerPump a onto:Component .
+onto:FillerValve a onto:Component .
+onto:CapperJaws a onto:Component .
+onto:CapperSpindle a onto:Component .
+onto:LabelRoll a onto:Component .
+onto:LabelPrinter a onto:Component .
+onto:LabelSensor a onto:Component .
+onto:PackerArm a onto:Component .
+onto:PackerGripper a onto:Component .
+onto:PackerConveyor a onto:Component .
+
 
 ### Jobs / production steps
 
@@ -18,6 +117,7 @@ onto:JobCapping   a onto:Job .
 onto:JobLabeling  a onto:Job .
 onto:JobPacking   a onto:Job .
 
+
 # Job sequence (workflow)
 
 onto:JobMixing   onto:nextJob onto:JobFilling .
@@ -25,39 +125,99 @@ onto:JobFilling  onto:nextJob onto:JobCapping .
 onto:JobCapping  onto:nextJob onto:JobLabeling .
 onto:JobLabeling onto:nextJob onto:JobPacking .
 
+
 ### Sensors (SSN/SOSA-style)
 
 onto:TempSensorMixer        a sosa:Sensor .
 onto:VibrationSensorFiller  a sosa:Sensor .
+onto:CapperTorqueSensor     a sosa:Sensor .
+onto:LabelPositionSensor    a sosa:Sensor .
+onto:PackerVisionSystem     a sosa:Sensor .
 
 onto:MixerA  onto:monitoredBy onto:TempSensorMixer .
 onto:FillerB onto:monitoredBy onto:VibrationSensorFiller .
+onto:CapperC onto:monitoredBy onto:CapperTorqueSensor .
+onto:LabelerD onto:monitoredBy onto:LabelPositionSensor .
+onto:PackerE onto:monitoredBy onto:PackerVisionSystem .
 
-### Error contexts (failures)
 
-# Keep these names so your CLI still works:
+### Error contexts (failures) with severity and downtime
+
 onto:OverheatingA a onto:ErrorContext ;
   onto:affectsMachine onto:MixerA ;
   onto:blocksJob      onto:JobMixing ;
-  onto:requiresAction onto:CoolantCheck .
+  onto:requiresAction onto:CoolantCheck ;
+  onto:hasSeverity 4 ;
+  onto:hasDowntimeMinutes 30 .
 
 onto:OverloadB a onto:ErrorContext ;
   onto:affectsMachine onto:FillerB ;
   onto:blocksJob      onto:JobFilling ;
-  onto:requiresAction onto:LoadBalancing .
+  onto:requiresAction onto:LoadBalancing ;
+  onto:hasSeverity 5 ;
+  onto:hasDowntimeMinutes 45 .
 
 onto:LabelMisalignmentD a onto:ErrorContext ;
   onto:affectsMachine onto:LabelerD ;
   onto:blocksJob      onto:JobLabeling ;
-  onto:requiresAction onto:LabelCalibration .
+  onto:requiresAction onto:LabelCalibration ;
+  onto:hasSeverity 2 ;
+  onto:hasDowntimeMinutes 10 .
 
-### Corrective actions
+onto:CapperJamC a onto:ErrorContext ;
+  onto:affectsMachine onto:CapperC ;
+  onto:blocksJob onto:JobCapping ;
+  onto:requiresAction onto:ClearJam ;
+  onto:hasSeverity 3 ;
+  onto:hasDowntimeMinutes 15 .
 
-onto:CoolantCheck     a onto:CorrectiveAction .
-onto:LoadBalancing    a onto:CorrectiveAction .
-onto:LabelCalibration a onto:CorrectiveAction .
+onto:ConveyorSlipE a onto:ErrorContext ;
+  onto:affectsMachine onto:PackerE ;
+  onto:blocksJob onto:JobPacking ;
+  onto:requiresAction onto:ReplaceConveyorBelt ;
+  onto:hasSeverity 4 ;
+  onto:hasDowntimeMinutes 60 .
 
-### Failure propagation (cascading effects)
+
+### Corrective actions - enhanced with spare parts
+
+onto:CoolantCheck     a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:CoolantFluid ;
+  onto:estimatedDurationHours 2.0 .
+
+onto:LoadBalancing    a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:FillerGasket ;
+  onto:estimatedDurationHours 3.5 .
+
+onto:LabelCalibration a onto:CorrectiveAction ;
+  onto:estimatedDurationHours 1.5 .
+
+onto:ClearJam a onto:CorrectiveAction ;
+  onto:estimatedDurationHours 1.0 .
+
+onto:ReplaceConveyorBelt a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:ConveyorBeltAssembly ;
+  onto:estimatedDurationHours 4.0 .
+
+### Spare parts inventory
+
+onto:CoolantFluid a onto:SparePart ;
+  onto:partNumber "COOL-500ML" ;
+  onto:leadTimeDays 1 ;
+  onto:costUSD 45.50 .
+
+onto:FillerGasket a onto:SparePart ;
+  onto:partNumber "FILLER-GSK-2" ;
+  onto:leadTimeDays 3 ;
+  onto:costUSD 125.00 .
+
+onto:ConveyorBeltAssembly a onto:SparePart ;
+  onto:partNumber "PKR-BELT-500MM" ;
+  onto:leadTimeDays 7 ;
+  onto:costUSD 850.00 .
+
+
+### Failure propagation (cascading effects) - more realistic chains
 
 # Mixer overheating → poor mixture → filler overload
 onto:PropagationAtoB a onto:FailurePropagation ;
@@ -69,14 +229,161 @@ onto:PropagationBtoD a onto:FailurePropagation ;
   onto:hasCause     onto:OverloadB ;
   onto:propagatesTo onto:LabelMisalignmentD .
 
-onto:OverheatingA
-  onto:hasSeverity 4 ;
-  onto:hasDowntimeMinutes 30 .
+# Capper jam can cause downstream issues
+onto:PropagationCtoD a onto:FailurePropagation ;
+  onto:hasCause     onto:CapperJamC ;
+  onto:propagatesTo onto:LabelMisalignmentD .
 
-onto:OverloadB
-  onto:hasSeverity 5 ;
-  onto:hasDowntimeMinutes 45 .
+# Conveyor slip can cascade
+onto:PropagationEtoDtoD a onto:FailurePropagation ;
+  onto:hasCause     onto:ConveyorSlipE ;
+  onto:propagatesTo onto:LabelMisalignmentD .
 
-onto:LabelMisalignmentD
-  onto:hasSeverity 2 ;
-  onto:hasDowntimeMinutes 10 .
+
+### Operators (with experience and specialties)
+
+onto:OperatorAlice a onto:Operator ;
+  onto:hasExperienceLevel 5 ;
+  onto:hasSpecialty "Mixing Systems" ;
+  onto:belongsToTeam onto:MaintenanceTeamA .
+
+onto:OperatorBob a onto:Operator ;
+  onto:hasExperienceLevel 4 ;
+  onto:hasSpecialty "Hydraulic Systems" ;
+  onto:belongsToTeam onto:MaintenanceTeamA .
+
+onto:OperatorCharlie a onto:Operator ;
+  onto:hasExperienceLevel 3 ;
+  onto:hasSpecialty "Mechanical Assemblies" ;
+  onto:belongsToTeam onto:MaintenanceTeamB .
+
+onto:OperatorDiana a onto:Operator ;
+  onto:hasExperienceLevel 5 ;
+  onto:hasSpecialty "Precision Equipment" ;
+  onto:belongsToTeam onto:MaintenanceTeamB .
+
+onto:OperatorEve a onto:Operator ;
+  onto:hasExperienceLevel 2 ;
+  onto:hasSpecialty "Conveyor Systems" ;
+  onto:belongsToTeam onto:MaintenanceTeamB .
+
+
+### Maintenance Teams
+
+onto:MaintenanceTeamA a onto:Team .
+onto:MaintenanceTeamB a onto:Team .
+
+
+### Maintenance Tasks (scheduled and overdue)
+
+onto:MaintenanceTask_MixerA_1 a onto:MaintenanceTask ;
+  onto:maintenanceDescription "Quarterly bearing inspection and lubrication" ;
+  onto:dueDate "2025-12-30T08:00:00"^^xsd:dateTime ;
+  onto:estimatedDurationHours 2.5 .
+
+onto:MaintenanceTask_FillerB_1 a onto:MaintenanceTask ;
+  onto:maintenanceDescription "Bi-monthly pump seal replacement" ;
+  onto:dueDate "2025-12-15T08:00:00"^^xsd:dateTime ;
+  onto:estimatedDurationHours 3.0 .
+
+onto:MaintenanceTask_CapperC_1 a onto:MaintenanceTask ;
+  onto:maintenanceDescription "Monthly spindle alignment check" ;
+  onto:dueDate "2025-12-20T14:00:00"^^xsd:dateTime ;
+  onto:estimatedDurationHours 1.5 .
+
+onto:MaintenanceTask_LabelerD_1 a onto:MaintenanceTask ;
+  onto:maintenanceDescription "Quarterly label path calibration" ;
+  onto:dueDate "2026-02-05T10:00:00"^^xsd:dateTime ;
+  onto:estimatedDurationHours 2.0 .
+
+onto:MaintenanceTask_PackerE_1 a onto:MaintenanceTask ;
+  onto:maintenanceDescription "Semi-annual gripper pad replacement" ;
+  onto:dueDate "2026-05-28T08:00:00"^^xsd:dateTime ;
+  onto:estimatedDurationHours 3.5 .
+
+
+### Production Batches (recent and current)
+
+onto:Batch_2025_12_001 a onto:ProductionBatch ;
+  onto:batchSize 5000 ;
+  onto:batchDate "2025-12-10T06:00:00"^^xsd:dateTime ;
+  onto:processesBatch onto:MixerA ;
+  onto:processesBatch onto:FillerB ;
+  onto:processesBatch onto:CapperC ;
+  onto:processesBatch onto:LabelerD ;
+  onto:processesBatch onto:PackerE .
+
+onto:Batch_2025_12_002 a onto:ProductionBatch ;
+  onto:batchSize 4500 ;
+  onto:batchDate "2025-12-11T08:30:00"^^xsd:dateTime ;
+  onto:processesBatch onto:MixerA ;
+  onto:processesBatch onto:FillerB ;
+  onto:processesBatch onto:CapperC ;
+  onto:processesBatch onto:LabelerD ;
+  onto:processesBatch onto:PackerE .
+
+onto:Batch_2025_12_003 a onto:ProductionBatch ;
+  onto:batchSize 5200 ;
+  onto:batchDate "2025-12-12T07:00:00"^^xsd:dateTime ;
+  onto:processesBatch onto:MixerA ;
+  onto:processesBatch onto:FillerB ;
+  onto:processesBatch onto:CapperC ;
+  onto:processesBatch onto:LabelerD ;
+  onto:processesBatch onto:PackerE .
+
+
+### Performance Metrics (recent sensor readings)
+
+onto:MetricMixerTemp a onto:PerformanceMetric ;
+  onto:metricName "Temperature" ;
+  onto:metricValue 85.3 ;
+  onto:metricUnit "Celsius" ;
+  onto:measurementTime "2025-12-12T10:45:00"^^xsd:dateTime .
+
+onto:MetricMixerSpeed a onto:PerformanceMetric ;
+  onto:metricName "RPM" ;
+  onto:metricValue 450.0 ;
+  onto:metricUnit "RPM" ;
+  onto:measurementTime "2025-12-12T10:45:00"^^xsd:dateTime .
+
+onto:MetricFillerPressure a onto:PerformanceMetric ;
+  onto:metricName "Hydraulic Pressure" ;
+  onto:metricValue 125.5 ;
+  onto:metricUnit "PSI" ;
+  onto:measurementTime "2025-12-12T10:50:00"^^xsd:dateTime .
+
+onto:MetricFillerFlow a onto:PerformanceMetric ;
+  onto:metricName "Flow Rate" ;
+  onto:metricValue 18.7 ;
+  onto:metricUnit "L/min" ;
+  onto:measurementTime "2025-12-12T10:50:00"^^xsd:dateTime .
+
+onto:MetricCapperTorque a onto:PerformanceMetric ;
+  onto:metricName "Cap Torque" ;
+  onto:metricValue 22.5 ;
+  onto:metricUnit "N·m" ;
+  onto:measurementTime "2025-12-12T10:55:00"^^xsd:dateTime .
+
+onto:MetricLabelAccuracy a onto:PerformanceMetric ;
+  onto:metricName "Label Alignment Accuracy" ;
+  onto:metricValue 98.9 ;
+  onto:metricUnit "Percent" ;
+  onto:measurementTime "2025-12-12T11:00:00"^^xsd:dateTime .
+
+onto:MetricLabelSpeed a onto:PerformanceMetric ;
+  onto:metricName "Labeling Speed" ;
+  onto:metricValue 350.0 ;
+  onto:metricUnit "units/min" ;
+  onto:measurementTime "2025-12-12T11:00:00"^^xsd:dateTime .
+
+onto:MetricPackerSpeed a onto:PerformanceMetric ;
+  onto:metricName "Packing Speed" ;
+  onto:metricValue 240.0 ;
+  onto:metricUnit "units/min" ;
+  onto:measurementTime "2025-12-12T11:05:00"^^xsd:dateTime .
+
+onto:MetricPackerAccuracy a onto:PerformanceMetric ;
+  onto:metricName "Pack Position Accuracy" ;
+  onto:metricValue 99.5 ;
+  onto:metricUnit "Percent" ;
+  onto:measurementTime "2025-12-12T11:05:00"^^xsd:dateTime .

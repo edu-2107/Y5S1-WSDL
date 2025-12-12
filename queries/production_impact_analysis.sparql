@@ -1,0 +1,62 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+# Query to analyze impact of failures on production batches
+SELECT ?batch ?batchSize ?batchDate ?affectedMachines ?totalDowntimeMinutes ?totalSeverity ?cascadingFailures
+WHERE {
+  ?batch a onto:ProductionBatch ;
+         onto:batchSize ?batchSize ;
+         onto:batchDate ?batchDate ;
+         onto:processesBatch ?machine .
+
+  # Machines affected by failures
+  {
+    SELECT ?batch (COUNT(DISTINCT ?failedMachine) AS ?affectedMachines)
+    WHERE {
+      ?batch onto:processesBatch ?failedMachine .
+      ?failure a onto:ErrorContext ;
+               onto:affectsMachine ?failedMachine .
+    }
+    GROUP BY ?batch
+  }
+
+  # Total downtime for this batch
+  {
+    SELECT ?batch (SUM(?downtime) AS ?totalDowntimeMinutes)
+    WHERE {
+      ?batch onto:processesBatch ?machine .
+      ?failure a onto:ErrorContext ;
+               onto:affectsMachine ?machine ;
+               onto:hasDowntimeMinutes ?downtime .
+    }
+    GROUP BY ?batch
+  }
+
+  # Total severity across all failures
+  {
+    SELECT ?batch (SUM(?severity) AS ?totalSeverity)
+    WHERE {
+      ?batch onto:processesBatch ?machine .
+      ?failure a onto:ErrorContext ;
+               onto:affectsMachine ?machine ;
+               onto:hasSeverity ?severity .
+    }
+    GROUP BY ?batch
+  }
+
+  # Count cascading failures
+  {
+    SELECT ?batch (COUNT(?cascade) AS ?cascadingFailures)
+    WHERE {
+      ?batch onto:processesBatch ?machine .
+      ?failure a onto:ErrorContext ;
+               onto:affectsMachine ?machine .
+      ?prop a onto:FailurePropagation ;
+            onto:hasCause ?failure ;
+            onto:propagatesTo ?cascade .
+    }
+    GROUP BY ?batch
+  }
+
+  # __FILTER__
+}
+ORDER BY DESC(?totalDowntimeMinutes)

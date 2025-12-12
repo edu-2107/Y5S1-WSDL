@@ -1,0 +1,39 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+# Query to assess maintenance team workload
+SELECT ?team ?operatorCount ?machinesResponsible ?totalScheduledHours
+WHERE {
+  ?team a onto:Team .
+
+  # Count operators in this team
+  {
+    SELECT ?team (COUNT(?operator) AS ?operatorCount)
+    WHERE {
+      ?operator a onto:Operator ;
+                onto:belongsToTeam ?team .
+    }
+    GROUP BY ?team
+  }
+
+  # Count machines this team maintains
+  {
+    SELECT ?team (COUNT(DISTINCT ?machine) AS ?machinesResponsible)
+    WHERE {
+      ?machine a onto:Machine ;
+               onto:maintainedBy ?team .
+    }
+    GROUP BY ?team
+  }
+
+  # Sum estimated maintenance hours
+  {
+    SELECT ?team (SUM(?hours) AS ?totalScheduledHours)
+    WHERE {
+      ?machine a onto:Machine ;
+               onto:maintainedBy ?team ;
+               onto:requiresMaintenance ?task .
+      ?task onto:estimatedDurationHours ?hours .
+    }
+    GROUP BY ?team
+  }
+}
