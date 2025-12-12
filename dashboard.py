@@ -4,14 +4,53 @@ from pathlib import Path
 from graph_manager import OntoMaintGraph
 
 BASE_DIR = Path(__file__).resolve().parent
+QUERIES_DIR = BASE_DIR / "queries"
 
 st.set_page_config(page_title="OntoMaint Dashboard", layout="wide")
-st.title("OntoMaint – Semantic Maintenance Dashboard")
+st.title("OntoMaint Dashboard")
 
 
-# -------------------------
+# ============================================================
+# Per-query parameter metadata
+# ============================================================
+QUERY_PARAMS = {
+    "impact_failure.sparql": {
+        "title": "Failure Impact",
+        "params": [
+            {"var": "?failure", "label": "Failure", "type": "ErrorContext"},
+        ],
+    },
+    "actions_for_failure.sparql": {
+        "title": "Corrective Actions",
+        "params": [
+            {"var": "?failure", "label": "Failure", "type": "ErrorContext", "allow_all": True},
+        ],
+    },
+    "whatif_machine_failure.sparql": {
+        "title": "What-if by Machine",
+        "params": [
+            {"var": "?machine", "label": "Machine", "type": "Machine", "allow_all": True},
+        ],
+    },
+    "critical_failures.sparql": {"title": "Critical Failures", "params": []},
+    "high_risk_failures.sparql": {"title": "High-Risk Failures", "params": []},
+    "machine_health.sparql": {"title": "Machine Health", "params": []},
+}
+
+
+# ============================================================
+# Pretty labels for queries
+# ============================================================
+def pretty_query_label(filename: str) -> str:
+    meta = QUERY_PARAMS.get(filename)
+    if meta and meta.get("title"):
+        return meta["title"]
+    return filename.replace(".sparql", "").replace("_", " ").title()
+
+
+# ============================================================
 # Helpers
-# -------------------------
+# ============================================================
 def local_name(x) -> str:
     s = "" if x is None else str(x)
     return s.split("#")[-1] if "#" in s else s
@@ -25,230 +64,224 @@ def load_graph():
     return g
 
 
-def run_query(query: str):
+def run_query_raw(query_text: str):
     g = load_graph()
-    return list(g.run_query(query))
+    qr = g.graph.query(query_text)
+    vars_ = [str(v) for v in getattr(qr, "vars", [])]
+    rows = list(qr)
+    return vars_, rows
 
 
-# -------------------------
-# Top panels: Critical + Sensor alerts
-# -------------------------
-top_left, top_right = st.columns([1, 1], gap="large")
+def rows_to_df(vars_, rows, prettify=True) -> pd.DataFrame:
+    if not rows:
+        return pd.DataFrame()
 
-with top_left:
-    st.subheader("Critical failures (severity / downtime)")
-
-    critical_rows = run_query("""
-    PREFIX onto: <http://example.org/ontomaint#>
-    SELECT ?failure ?machine ?severity ?downtime
-    WHERE {
-      ?failure a onto:ErrorContext ;
-               onto:affectsMachine ?machine ;
-               onto:hasSeverity ?severity ;
-               onto:hasDowntimeMinutes ?downtime .
-    }
-    ORDER BY DESC(?severity) DESC(?downtime)
-    """)
-
-    if critical_rows:
-        df_crit = pd.DataFrame(
-            [(local_name(f), local_name(m), int(s), int(d))
-             for f, m, s, d in critical_rows],
-            columns=["Failure", "Machine", "Severity", "Downtime (min)"]
-        )
-        st.dataframe(df_crit, use_container_width=True, hide_index=True)
+    if vars_ and len(vars_) == len(rows[0]):
+        cols = [v.lstrip("?") for v in vars_]
     else:
-        st.info("No severity/downtime data found.")
+        cols = [f"col{i+1}" for i in range(len(rows[0]))]
 
-
-with top_right:
-    st.subheader("Sensor alerts")
-
-    alerts_rows = run_query("""
-    PREFIX onto: <http://example.org/ontomaint#>
-    SELECT ?event ?machine ?temp ?vib ?status ?time
-    WHERE {
-      ?event a onto:SensorEvent ;
-             onto:forMachine ?machine ;
-             onto:temperature ?temp ;
-             onto:vibration ?vib ;
-             onto:status ?status ;
-             onto:observedAt ?time .
-      FILTER (?status = "ALERT" || ?temp > 80.0 || ?vib > 0.4)
-    }
-    ORDER BY ?machine ?time
-    """)
-
-    if alerts_rows:
-        df_alerts = pd.DataFrame(
-            [(local_name(e), local_name(m), float(t), float(v), str(sts), str(tm))
-             for e, m, t, v, sts, tm in alerts_rows],
-            columns=["Event", "Machine", "Temp", "Vibration", "Status", "Time"]
-        )
-        st.dataframe(df_alerts, use_container_width=True, hide_index=True)
-    else:
-        st.info("No abnormal sensor events found.")
-
-st.divider()
-
-# -------------------------
-# Failure selection + Impact
-# -------------------------
-failures_rows = run_query("""
-PREFIX onto: <http://example.org/ontomaint#>
-SELECT DISTINCT ?failure
-WHERE {
-  ?failure a onto:ErrorContext .
-}
-ORDER BY ?failure
-""")
-
-failure_names = [local_name(f) for (f,) in failures_rows]
-
-col1, col2 = st.columns([1, 2], gap="large")
-
-with col1:
-    st.subheader("Failure selection")
-    selected_name = st.selectbox("Failure", failure_names)
-    failure_uri = f"http://example.org/ontomaint#{selected_name}"
-
-with col2:
-    st.subheader("Impact")
-
-    impact_rows = run_query(f"""
-    PREFIX onto: <http://example.org/ontomaint#>
-    SELECT ?machine ?job ?nextJob ?propFailure
-    WHERE {{
-      <{failure_uri}> a onto:ErrorContext ;
-                      onto:affectsMachine ?machine ;
-                      onto:blocksJob ?job .
-      OPTIONAL {{ ?job onto:nextJob ?nextJob . }}
-      OPTIONAL {{
-        ?fp a onto:FailurePropagation ;
-            onto:hasCause <{failure_uri}> ;
-            onto:propagatesTo ?propFailure .
-      }}
-    }}
-    """)
-
-    df_impact = pd.DataFrame(
-        [(local_name(a), local_name(b), local_name(c) if c else "", local_name(d) if d else "")
-         for a, b, c, d in impact_rows],
-        columns=["Machine", "Blocked job", "Next job", "Propagates to"]
+    df = pd.DataFrame(
+        [[str(cell) if cell is not None else "" for cell in row] for row in rows],
+        columns=cols,
     )
-    st.dataframe(df_impact, use_container_width=True, hide_index=True)
 
-st.divider()
+    if prettify:
+        df = df.applymap(local_name)
 
-# -------------------------
-# Recommended actions
-# -------------------------
-st.subheader("Recommended actions")
+    return df
 
-actions_rows = run_query(f"""
-PREFIX onto: <http://example.org/ontomaint#>
-SELECT ?action WHERE {{
-  <{failure_uri}> onto:requiresAction ?action .
-}}
-""")
 
-actions = [local_name(a[0]) for a in actions_rows]
-st.write(actions or ["(none)"])
+def list_sparql_files() -> list[Path]:
+    return sorted(QUERIES_DIR.glob("*.sparql")) if QUERIES_DIR.exists() else []
 
-st.divider()
 
-# -------------------------
-# SPARQL Query Console
-# -------------------------
-st.header("SPARQL Query Console")
+def load_query_file(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
 
-st.markdown("Explore the knowledge graph using SPARQL queries.")
 
-st.subheader("Query templates")
+def inject_filter(query_text: str, filter_snippet: str) -> str:
+    if filter_snippet.strip():
+        query_text = query_text.replace("# __FILTER__", filter_snippet)
+        query_text = query_text.replace("#__FILTER__", filter_snippet)
+        query_text = query_text.replace("__FILTER__", filter_snippet)
+    else:
+        query_text = query_text.replace("# __FILTER__", "")
+        query_text = query_text.replace("#__FILTER__", "")
+        query_text = query_text.replace("__FILTER__", "")
+    return query_text
 
-template = st.selectbox(
-    "Choose a template",
-    [
-        "List all failures",
-        "Impact of OverheatingA",
-        "Critical failures",
-        "What-if: failures affecting FillerB",
-        "Sensor alerts"
-    ]
+
+# ============================================================
+# Instance fetchers
+# ============================================================
+def get_instances_of(class_local_name: str) -> list[str]:
+    vars_, rows = run_query_raw(f"""
+    PREFIX onto: <http://example.org/ontomaint#>
+    SELECT DISTINCT ?x
+    WHERE {{ ?x a onto:{class_local_name} . }}
+    ORDER BY ?x
+    """)
+    return [local_name(r[0]) for r in rows] if rows else []
+
+
+def get_failure_like_instances() -> list[str]:
+    vars_, rows = run_query_raw("""
+    PREFIX onto: <http://example.org/ontomaint#>
+    SELECT DISTINCT ?f
+    WHERE {
+      { ?f a onto:ErrorContext . }
+      UNION { ?f onto:affectsMachine ?m . }
+      UNION { ?f onto:blocksJob ?j . }
+      UNION {
+        ?fp a onto:FailurePropagation ;
+            onto:hasCause ?f .
+      }
+    }
+    ORDER BY ?f
+    """)
+    return [local_name(r[0]) for r in rows] if rows else []
+
+
+# ============================================================
+# Sidebar – Query selection
+# ============================================================
+st.sidebar.header("Controls")
+
+files = list_sparql_files()
+file_names = [f.name for f in files]
+
+query_values = ["__NONE__"] + file_names
+
+selected = st.sidebar.selectbox(
+    "Query",
+    query_values,
+    format_func=lambda v: "— Select a query —" if v == "__NONE__" else pretty_query_label(v),
 )
 
-if template == "List all failures":
-    query_text = """PREFIX onto: <http://example.org/ontomaint#>
-SELECT ?failure WHERE { ?failure a onto:ErrorContext . }"""
+if selected == "__NONE__":
+    st.info("Select a query from the sidebar to run it.")
+    st.stop()
 
-elif template == "Impact of OverheatingA":
-    query_text = """PREFIX onto: <http://example.org/ontomaint#>
-SELECT ?machine ?job ?nextJob ?propFailure
-WHERE {
-  onto:OverheatingA onto:affectsMachine ?machine ;
-                    onto:blocksJob ?job .
-  OPTIONAL { ?job onto:nextJob ?nextJob . }
-  OPTIONAL {
-    ?fp a onto:FailurePropagation ;
-        onto:hasCause onto:OverheatingA ;
-        onto:propagatesTo ?propFailure .
-  }
-}"""
+query_file = QUERIES_DIR / selected
+query_name = query_file.name
+query_text = load_query_file(query_file)
 
-elif template == "Critical failures":
-    query_text = """PREFIX onto: <http://example.org/ontomaint#>
-SELECT ?failure ?severity ?downtime
-WHERE {
-  ?failure a onto:ErrorContext ;
-           onto:hasSeverity ?severity ;
-           onto:hasDowntimeMinutes ?downtime .
+meta = QUERY_PARAMS.get(query_name, {"title": pretty_query_label(query_name), "params": []})
+params = meta["params"]
+
+
+# ============================================================
+# Sidebar – Parameters (HARD-CODED BATCH EXCLUSION HERE)
+# ============================================================
+st.sidebar.divider()
+st.sidebar.subheader("Parameters")
+
+param_values = {}
+
+EXCLUDED_BATCHES = {
+    "Batch_2025_12_001",
+    "Batch_2025_12_002",
+    "Batch_2025_12_003",
 }
-ORDER BY DESC(?severity)"""
 
-elif template == "What-if: failures affecting FillerB":
-    query_text = """PREFIX onto: <http://example.org/ontomaint#>
-SELECT ?failure ?job ?nextJob
-WHERE {
-  ?failure a onto:ErrorContext ;
-           onto:affectsMachine onto:FillerB ;
-           onto:blocksJob ?job .
-  OPTIONAL { ?job onto:nextJob ?nextJob . }
-}"""
+if not params:
+    st.sidebar.caption("This query has no parameters.")
+else:
+    for p in params:
+        p_var = p["var"]
+        p_label = p.get("label", p_var)
+        p_type = p.get("type")
+        allow_all = bool(p.get("allow_all", False))
 
-elif template == "Sensor alerts":
-    query_text = """PREFIX onto: <http://example.org/ontomaint#>
-SELECT ?machine ?temp ?vib ?status ?time
-WHERE {
-  ?e a onto:SensorEvent ;
-     onto:forMachine ?machine ;
-     onto:temperature ?temp ;
-     onto:vibration ?vib ;
-     onto:status ?status ;
-     onto:observedAt ?time .
-  FILTER (?status = "ALERT" || ?temp > 80.0 || ?vib > 0.4)
-}
-ORDER BY ?machine ?time"""
+        if p_type == "Machine":
+            options = get_instances_of("Machine")
+            # 🔴 HARD-CODED EXCLUSION
+            options = [m for m in options if m not in EXCLUDED_BATCHES]
 
-query_text = st.text_area(
-    "SPARQL query",
-    value=query_text,
-    height=250
-)
-
-if st.button("Run query"):
-    try:
-        g = load_graph()
-        results = list(g.run_query(query_text))
-
-        if not results:
-            st.info("Query executed successfully, but returned no results.")
+        elif p_type == "ErrorContext":
+            options = get_failure_like_instances()
         else:
-            df = pd.DataFrame(
-                [[local_name(cell) for cell in row] for row in results]
-            )
-            st.success(f"Query returned {len(df)} results.")
-            st.dataframe(df, use_container_width=True)
+            options = []
 
+        if not options:
+            st.sidebar.warning(f"No options found for {p_label}.")
+            continue
+
+        if allow_all:
+            options = ["All"] + options
+
+        chosen = st.sidebar.selectbox(
+            p_label,
+            options,
+            key=f"{query_name}:{p_var}",
+        )
+
+        if chosen != "All":
+            param_values[p_var] = chosen
+
+
+# ============================================================
+# Build FILTER
+# ============================================================
+filter_lines = []
+for var, val in param_values.items():
+    uri = f"http://example.org/ontomaint#{val}"
+    filter_lines.append(f"FILTER ({var} = <{uri}>)")
+
+final_query = inject_filter(query_text, "\n".join(filter_lines))
+
+
+# ============================================================
+# Main – Query Result Viewer
+# ============================================================
+st.header("Query Result Viewer")
+st.caption(f"Query: {pretty_query_label(query_name)}")
+
+c1, c2 = st.columns(2)
+show_query = c1.checkbox("Show query text")
+prettify = c2.checkbox("Prettify URIs", value=True)
+
+if show_query:
+    st.code(final_query, language="sparql")
+
+try:
+    vars_, rows = run_query_raw(final_query)
+    df = rows_to_df(vars_, rows, prettify)
+
+    if df.empty:
+        st.info("Query executed successfully, but returned no results.")
+    else:
+        st.success(f"Returned {len(df)} rows.")
+        st.dataframe(df, use_container_width=True, hide_index=True)
+
+except Exception as e:
+    st.error("Error executing query")
+    st.code(str(e))
+
+
+# ============================================================
+# SPARQL Console
+# ============================================================
+st.divider()
+st.header("SPARQL Console")
+
+console_query = st.text_area(
+    "Write SPARQL",
+    """PREFIX onto: <http://example.org/ontomaint#>
+SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 25
+""",
+    height=180,
+)
+
+if st.button("Run console query"):
+    try:
+        vars_, rows = run_query_raw(console_query)
+        df = rows_to_df(vars_, rows, prettify=True)
+        if df.empty:
+            st.info("No results.")
+        else:
+            st.dataframe(df, use_container_width=True, hide_index=True)
     except Exception as e:
-        st.error("Error while executing SPARQL query:")
+        st.error("Console query error")
         st.code(str(e))
