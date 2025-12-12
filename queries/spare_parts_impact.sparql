@@ -1,0 +1,18 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+# Query to identify spare parts needed for corrective actions
+SELECT ?failure ?action ?sparePart ?partNumber ?leadTimeDays ?costUSD
+WHERE {
+  ?failure a onto:ErrorContext ;
+           onto:requiresAction ?action .
+
+  OPTIONAL {
+    ?action onto:requiresSparePart ?sparePart .
+    ?sparePart onto:partNumber ?partNumber ;
+              onto:leadTimeDays ?leadTimeDays ;
+              onto:costUSD ?costUSD .
+  }
+
+  # __FILTER__
+}
+ORDER BY DESC(?costUSD)

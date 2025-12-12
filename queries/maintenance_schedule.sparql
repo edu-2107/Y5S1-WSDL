@@ -1,0 +1,27 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+# Query to get scheduled maintenance tasks and their operators
+SELECT ?machine ?task ?description ?dueDate ?estimatedHours ?assignedTeam ?operatorSpecialty
+WHERE {
+  ?machine a onto:Machine ;
+           onto:requiresMaintenance ?task ;
+           onto:maintainedBy ?team .
+
+  ?task a onto:MaintenanceTask ;
+        onto:maintenanceDescription ?description ;
+        onto:dueDate ?dueDate ;
+        onto:estimatedDurationHours ?estimatedHours .
+
+  ?team a onto:Team .
+
+  # Optional: find the best operator for the task
+  OPTIONAL {
+    ?machine onto:hasComponent ?comp .
+    ?operator onto:belongsToTeam ?team ;
+             onto:hasSpecialty ?operatorSpecialty .
+  }
+
+  # Replace this filter with your specific machine or date range
+  # __FILTER__
+}
+ORDER BY ASC(?dueDate)

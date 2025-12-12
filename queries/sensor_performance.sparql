@@ -1,0 +1,20 @@
+PREFIX onto: <http://example.org/ontomaint#>
+PREFIX sosa: <http://www.w3.org/ns/sosa/>
+
+# Query to retrieve latest sensor readings and machine performance metrics
+SELECT ?machine ?sensor ?metricName ?metricValue ?metricUnit ?measurementTime
+WHERE {
+  ?machine a onto:Machine ;
+           onto:monitoredBy ?sensor ;
+           onto:hasPerformanceMetric ?metric .
+
+  ?metric a onto:PerformanceMetric ;
+          onto:metricName ?metricName ;
+          onto:metricValue ?metricValue ;
+          onto:metricUnit ?metricUnit ;
+          onto:measurementTime ?measurementTime .
+
+  # Optional: filter by machine or sensor type
+  # __FILTER__
+}
+ORDER BY DESC(?measurementTime)

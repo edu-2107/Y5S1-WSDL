@@ -1,0 +1,13 @@
+PREFIX onto: <http://example.org/ontomaint#>
+
+# Query to assess overall machine health status
+SELECT ?machine ?uptime ?failureRate ?age ?lastMaintenance ?interval
+WHERE {
+  ?machine a onto:Machine ;
+           onto:uptime ?uptime ;
+           onto:failureRate ?failureRate ;
+           onto:hasAgeYears ?age ;
+           onto:lastMaintenanceDate ?lastMaintenance ;
+           onto:maintenanceIntervalDays ?interval .
+}
+ORDER BY ASC(?uptime)
