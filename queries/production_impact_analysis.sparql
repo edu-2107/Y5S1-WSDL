@@ -1,0 +1,32 @@
+PREFIX onto: <http://example.org/ontomaint#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Query to analyze the impact of machine failures on production batches and downtime
+SELECT ?batch ?batchSize ?batchDate ?affectedMachines ?totalDowntime ?totalSeverity ?cascading
+WHERE {
+  ?batch a onto:ProductionBatch ;
+         onto:batchSize ?batchSize ;
+         onto:batchDate ?batchDate .
+
+  # Encontrar máquinas que processam este lote
+  ?machine onto:processesBatch ?batch .
+
+  # Encontrar falhas que afetam essas máquinas
+  OPTIONAL {
+    ?failure onto:affectsMachine ?machine ;
+             onto:hasDowntimeMinutes ?dtime ;
+             onto:hasSeverity ?sev .
+    
+    # Verificar se esta falha causa outras (efeito cascata)
+    OPTIONAL {
+      ?prop onto:hasCause ?failure .
+      BIND("Yes" AS ?isCascading)
+    }
+  }
+
+  BIND(IF(BOUND(?machine), ?machine, "None") AS ?affectedMachines)
+  BIND(IF(BOUND(?dtime), ?dtime, 0) AS ?totalDowntime)
+  BIND(IF(BOUND(?sev), ?sev, 0) AS ?totalSeverity)
+  BIND(IF(BOUND(?isCascading), "Yes", "No") AS ?cascading)
+}
+ORDER BY DESC(?totalSeverity)
