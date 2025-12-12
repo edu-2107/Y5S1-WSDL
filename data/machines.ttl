@@ -302,36 +302,6 @@ onto:MaintenanceTask_PackerE_1 a onto:MaintenanceTask ;
   onto:estimatedDurationHours 3.5 .
 
 
-### Production Batches (recent and current)
-
-onto:Batch_2025_12_001 a onto:ProductionBatch ;
-  onto:batchSize 5000 ;
-  onto:batchDate "2025-12-10T06:00:00"^^xsd:dateTime ;
-  onto:processesBatch onto:MixerA ;
-  onto:processesBatch onto:FillerB ;
-  onto:processesBatch onto:CapperC ;
-  onto:processesBatch onto:LabelerD ;
-  onto:processesBatch onto:PackerE .
-
-onto:Batch_2025_12_002 a onto:ProductionBatch ;
-  onto:batchSize 4500 ;
-  onto:batchDate "2025-12-11T08:30:00"^^xsd:dateTime ;
-  onto:processesBatch onto:MixerA ;
-  onto:processesBatch onto:FillerB ;
-  onto:processesBatch onto:CapperC ;
-  onto:processesBatch onto:LabelerD ;
-  onto:processesBatch onto:PackerE .
-
-onto:Batch_2025_12_003 a onto:ProductionBatch ;
-  onto:batchSize 5200 ;
-  onto:batchDate "2025-12-12T07:00:00"^^xsd:dateTime ;
-  onto:processesBatch onto:MixerA ;
-  onto:processesBatch onto:FillerB ;
-  onto:processesBatch onto:CapperC ;
-  onto:processesBatch onto:LabelerD ;
-  onto:processesBatch onto:PackerE .
-
-
 ### Performance Metrics (recent sensor readings)
 
 onto:MetricMixerTemp a onto:PerformanceMetric ;

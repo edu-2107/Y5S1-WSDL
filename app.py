@@ -91,39 +91,6 @@ def actions(failure):
     click.echo(f"Recommended actions for {failure}:\n")
     for _, action in results:
         click.echo(f"- {action}")
-
-
-@app.command("failures")
-def failures():
-    """
-    List all known ErrorContext instances in the graph.
-    """
-    g = OntoMaintGraph()
-    g.load_ontologies_and_data(BASE_DIR)
-    g.apply_reasoning()
-
-    query = """
-    PREFIX onto: <http://example.org/ontomaint#>
-    SELECT DISTINCT ?failure ?machine
-    WHERE {
-      ?failure a onto:ErrorContext .
-      OPTIONAL { ?failure onto:affectsMachine ?machine . }
-    }
-    ORDER BY ?failure
-    """
-
-    results = g.run_query(query)
-
-    if not results:
-        click.echo("No ErrorContext instances found in the graph.")
-        return
-
-    click.echo("Known failures:\n")
-    for failure, machine in results:
-        if machine:
-            click.echo(f"- {failure} (machine: {format_uri(machine)})")
-        else:
-            click.echo(f"- {failure}")
             
 
 @app.command("critical")
