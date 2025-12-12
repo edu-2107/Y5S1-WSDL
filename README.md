@@ -22,19 +22,16 @@ docker run --rm ontomaint critical                              # see list of cr
 docker run --rm ontomaint high-risk                             # see list of high-risk failures, and cascading failures,
                                                                 # ranked from most to least severe
 
-docker run --rm ontomaint maintenance                           #
+docker run --rm ontomaint maintenance                           # see list of maintenance tasks for each machine, including
+                                                                # how long it takes   and which team is responsible for it
 
-docker run --rm ontomaint whatif --machine <machine>            #
+docker run --rm ontomaint whatif --machine <machine>            # see which jobs will be blocked if a machine has a failure
 
-docker run --rm ontomaint production                            #
+docker run --rm ontomaint sensors                               # see information about each sensor
 
-docker run --rm ontomaint sensors                               #
+docker run --rm ontomaint spare-parts                           # see spare parts and their impact for each failure
 
-docker run --rm ontomaint spare-parts                           #
+docker run --rm ontomaint team-workload                         # see information about teams
 
-docker run --rm ontomaint team-workload                         #
-
-docker run --rm ontomaint all                                   #
-
-docker run --rm ontomaint failures                              # see current failures in machines
+docker run --rm ontomaint all                                   # run all the commands above
 ```
