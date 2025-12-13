@@ -178,6 +178,46 @@ onto:ConveyorSlipE a onto:ErrorContext ;
   onto:hasSeverity 4 ;
   onto:hasDowntimeMinutes 60 .
 
+# Fuga no selo da misturadora
+onto:SealLeakA a onto:ErrorContext ;
+  onto:affectsMachine onto:MixerA ;
+  onto:blocksJob      onto:JobMixing ;
+  onto:requiresAction onto:ReplaceMixerSeal ;
+  onto:hasSeverity 3 ;
+  onto:hasDowntimeMinutes 240 .
+
+# Falha nas válvulas da máquina de enchimento
+onto:ValveFailureB a onto:ErrorContext ;
+  onto:affectsMachine onto:FillerB ;
+  onto:blocksJob      onto:JobFilling ;
+  onto:requiresAction onto:ReplaceFillerValves ;
+  onto:hasSeverity 5 ;
+  onto:hasDowntimeMinutes 480 .
+
+# Desgaste nos grippers da máquina de caricas
+onto:WornGrippersC a onto:ErrorContext ;
+  onto:affectsMachine onto:CapperC ;
+  onto:blocksJob      onto:JobCapping ;
+  onto:requiresAction onto:ReplaceGrippers ;
+  onto:hasSeverity 2 ;
+  onto:hasDowntimeMinutes 60 .
+
+# Falha de impressão na rotuladora
+onto:PrintQualityFailD a onto:ErrorContext ;
+  onto:affectsMachine onto:LabelerD ;
+  onto:blocksJob      onto:JobLabeling ;
+  onto:requiresAction onto:ReplacePrintHead ;
+  onto:hasSeverity 3 ;
+  onto:hasDowntimeMinutes 30 .
+
+# Problema de pressão hidráulica (genérico ou no Packer)
+onto:LowHydraulicPressureE a onto:ErrorContext ;
+  onto:affectsMachine onto:PackerE ;
+  onto:blocksJob      onto:JobPacking ;
+  onto:requiresAction onto:ReplaceHydraulicFilter ;
+  onto:hasSeverity 4 ;
+  onto:hasDowntimeMinutes 90 .
+
 
 ### Corrective actions - enhanced with spare parts
 
@@ -190,14 +230,36 @@ onto:LoadBalancing    a onto:CorrectiveAction ;
   onto:estimatedDurationHours 3.5 .
 
 onto:LabelCalibration a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:LabelSensor ;
   onto:estimatedDurationHours 1.5 .
 
 onto:ClearJam a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:StarWheel ;
   onto:estimatedDurationHours 1.0 .
 
 onto:ReplaceConveyorBelt a onto:CorrectiveAction ;
   onto:requiresSparePart onto:ConveyorBeltAssembly ;
   onto:estimatedDurationHours 4.0 .
+
+onto:ReplaceMixerSeal a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:MixerSealKit ;
+  onto:estimatedDurationHours 4.0 .
+
+onto:ReplaceFillerValves a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:FillerValveSet ;
+  onto:estimatedDurationHours 8.0 .
+
+onto:ReplaceGrippers a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:CapperGripperPad ;
+  onto:estimatedDurationHours 1.0 .
+
+onto:ReplacePrintHead a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:LabelerPrintHead ;
+  onto:estimatedDurationHours 0.5 .
+
+onto:ReplaceHydraulicFilter a onto:CorrectiveAction ;
+  onto:requiresSparePart onto:HydraulicFilter ;
+  onto:estimatedDurationHours 1.5 .
 
 ### Spare parts inventory
 
@@ -216,6 +278,42 @@ onto:ConveyorBeltAssembly a onto:SparePart ;
   onto:leadTimeDays 7 ;
   onto:costUSD 850.00 .
 
+onto:MixerSealKit a onto:SparePart ;
+  onto:partNumber "MX-SEAL-2025" ;
+  onto:leadTimeDays 5 ;
+  onto:costUSD 150.00 .
+
+onto:FillerValveSet a onto:SparePart ;
+  onto:partNumber "FIL-VLV-SET" ;
+  onto:leadTimeDays 30 ;
+  onto:costUSD 1200.00 .
+
+onto:CapperGripperPad a onto:SparePart ;
+  onto:partNumber "CP-GRIP-50" ;
+  onto:leadTimeDays 14 ;
+  onto:costUSD 25.00 .
+
+onto:LabelerPrintHead a onto:SparePart ;
+  onto:partNumber "LBL-PH-300DPI" ;
+  onto:leadTimeDays 21 ;
+  onto:costUSD 450.00 .
+
+onto:HydraulicFilter a onto:SparePart ;
+  onto:partNumber "HYD-FILT-X10" ;
+  onto:leadTimeDays 2 ;
+  onto:costUSD 85.00 .
+
+# Para LabelMisalignmentD (Assumindo que a calibração exige troca de sensor)
+  onto:LabelSensor a onto:SparePart ;
+  onto:partNumber "LBL-SENS-OPT" ;
+  onto:leadTimeDays 10 ;
+  onto:costUSD 180.00 .
+
+# Para CapperJamC (Assumindo que o encravamento danificou a roda de entrada)
+  onto:StarWheel a onto:SparePart ;
+  onto:partNumber "CAP-STAR-WHL" ;
+  onto:leadTimeDays 15 ;
+  onto:costUSD 350.00 .
 
 ### Failure propagation (cascading effects) - more realistic chains
 
@@ -357,3 +455,37 @@ onto:MetricPackerAccuracy a onto:PerformanceMetric ;
   onto:metricValue 99.5 ;
   onto:metricUnit "Percent" ;
   onto:measurementTime "2025-12-12T11:05:00"^^xsd:dateTime .
+
+
+### PRODUCTION BATCHES & SCHEDULE (Dados de Produção) ###
+
+# Lote 1: Afetado pela Misturadora (que tem o erro de Sobreaquecimento)
+onto:Batch_2025_12_001 a onto:ProductionBatch ;
+  onto:batchSize 5000 ;
+  onto:batchDate "2025-12-12T08:00:00"^^xsd:dateTime .
+
+onto:MixerA onto:processesBatch onto:Batch_2025_12_001 .
+
+
+# Lote 2: Afetado pela Enchimento (que tem o erro de Sobrecarga + Cascata)
+onto:Batch_2025_12_002 a onto:ProductionBatch ;
+  onto:batchSize 3500 ;
+  onto:batchDate "2025-12-12T14:30:00"^^xsd:dateTime .
+
+onto:FillerB onto:processesBatch onto:Batch_2025_12_002 .
+
+
+# Lote 3: Afetado pela Rotuladora (Erro menor)
+onto:Batch_2025_12_003 a onto:ProductionBatch ;
+  onto:batchSize 12000 ;
+  onto:batchDate "2025-12-13T09:00:00"^^xsd:dateTime .
+
+onto:LabelerD onto:processesBatch onto:Batch_2025_12_003 .
+
+
+# Lote 4: Lote "limpo" (sem falhas associadas no momento)
+onto:Batch_2025_12_004 a onto:ProductionBatch ;
+  onto:batchSize 8000 ;
+  onto:batchDate "2025-12-14T10:00:00"^^xsd:dateTime .
+
+onto:PackerE onto:processesBatch onto:Batch_2025_12_004 .

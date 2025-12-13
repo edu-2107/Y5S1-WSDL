@@ -31,7 +31,6 @@ QUERY_PARAMS = {
         "params": [
             {"var": "?machine", "label": "Machine", "type": "Machine", "allow_all": True},
         ],
-        
     },
     "critical_failures.sparql": {
         "title": "Critical Failures",
@@ -49,7 +48,6 @@ QUERY_PARAMS = {
             {"var": "?machine", "label": "Machine", "type": "Machine", "allow_all": True},
         ],
     },
-
     "spare_parts_impact.sparql": {
         "title": "Spare Parts & Costs",
         "params": [] 
